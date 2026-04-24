@@ -6,7 +6,7 @@ export default class FallbackAdapter {
       return node;
     }
 
-    throw new Error('No canvas environment detected.');
+    throw new Error('未检测到可用的 Canvas 运行环境。');
   }
 
   getWindowInfo() {

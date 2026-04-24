@@ -1,60 +1,64 @@
 # mini-td
 
-A cross-platform-ready tower defense starter focused on WeChat Mini Game first, with a platform adapter layer for future Douyin support.
+一个面向“先微信、后多端”的塔防小游戏初始化工程，通过平台适配层为后续接入抖音小游戏预留扩展能力。
 
-## Current Status
+## 当前状态
 
-This is an initialization scaffold with:
-- WeChat-compatible entry (`game.js`, `game.json`, project config)
-- Platform adapter abstraction (`js/platform`)
-- Shared game domain skeleton (`js/core`)
-- Basic render loop and HUD (`js/render`)
-- Initial tower/enemy configuration modules (`js/config`)
+当前已完成初始化骨架：
+- 微信小游戏可运行入口（`game.js`、`game.json`、项目配置）
+- 平台适配层抽象（`js/platform`）
+- 共享核心逻辑骨架（`js/core`）
+- 基础渲染循环与 HUD（`js/render`）
+- 初始塔与敌人配置模块（`js/config`）
 
-## Architecture
+## 目录结构
 
 ```text
 mini-td
-├── game.js                       # runtime entry
-├── game.json                     # game runtime settings
+├── game.js                       # 游戏运行入口
+├── game.json                     # 游戏运行时配置
 ├── js
-│   ├── main.js                   # composition root
-│   ├── core                      # shared game logic (platform agnostic)
+│   ├── main.js                   # 组装入口
+│   ├── core                      # 共享核心逻辑（平台无关）
 │   │   ├── entities
 │   │   └── systems
-│   ├── platform                  # platform-specific adapter layer
+│   ├── platform                  # 平台适配层
 │   │   └── adapters
-│   ├── render                    # canvas rendering logic
-│   ├── config                    # static balancing/config data
-│   ├── runtime                   # runtime constants/hooks
-│   └── utils                     # utility helpers
-├── images                        # visual assets
-└── audio                         # sound assets
+│   ├── render                    # Canvas 渲染逻辑
+│   ├── config                    # 静态数值与配置
+│   ├── runtime                   # 运行时常量与钩子
+│   └── utils                     # 通用工具函数
+├── images                        # 图片资源
+└── audio                         # 音频资源
 ```
 
-## Run Locally (WeChat DevTools)
+## 本地运行（微信开发者工具）
 
-1. Open WeChat DevTools.
-2. Import this folder: `/Users/ganyu/workspace/personal/github/mini-td`.
-3. Create or bind your Mini Game AppID.
-4. Compile and run.
+1. 打开微信开发者工具。
+2. 导入目录：`/Users/ganyu/workspace/personal/github/mini-td`。
+3. 创建或绑定小游戏 AppID。
+4. 编译运行。
 
-## Recommended Git Workflow
+## Git 协作建议
 
-- Main branch: `main`
-- Feature branches: `feat/<topic>`
-- Fix branches: `fix/<topic>`
-- Conventional commits:
+- 主分支：`main`
+- 功能分支：`feat/<topic>`
+- 修复分支：`fix/<topic>`
+- 提交规范（Conventional Commits）：
   - `feat: ...`
   - `fix: ...`
   - `chore: ...`
   - `docs: ...`
 
-## Next Milestones
+## 文档与注释规范
 
-1. Grid + path authoring
-2. Enemy marching on path
-3. Tower placement and target acquisition
-4. Projectile and damage resolution
-5. Wave progression and win/lose loop
-6. UI + save data + ad/reward integration via platform adapter
+- 从现在开始，仓库内新增和修改的注释、设计文档、说明文档统一使用中文。
+
+## 下一步里程碑
+
+1. 网格与路径编辑
+2. 敌人沿路径行进
+3. 防御塔放置与索敌
+4. 子弹与伤害结算
+5. 波次推进与胜负循环
+6. UI、存档与广告激励（通过平台适配层接入）

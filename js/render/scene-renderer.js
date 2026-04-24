@@ -38,12 +38,14 @@ export default class SceneRenderer {
   }
 
   drawHud(ctx, snapshot) {
+    const stateText = snapshot.state === 'running' ? '进行中' : '待开始';
+
     ctx.fillStyle = '#f0f4f8';
     ctx.font = '20px Arial';
-    ctx.fillText(`Mini TD Prototype`, 16, 30);
-    ctx.fillText(`State: ${snapshot.state}`, 16, 56);
-    ctx.fillText(`Wave: ${snapshot.wave}`, 16, 82);
-    ctx.fillText(`Life: ${snapshot.life}`, 16, 108);
-    ctx.fillText(`Gold: ${snapshot.gold}`, 16, 134);
+    ctx.fillText(`迷你塔防原型`, 16, 30);
+    ctx.fillText(`状态：${stateText}`, 16, 56);
+    ctx.fillText(`波次：${snapshot.wave}`, 16, 82);
+    ctx.fillText(`生命：${snapshot.life}`, 16, 108);
+    ctx.fillText(`金币：${snapshot.gold}`, 16, 134);
   }
 }
