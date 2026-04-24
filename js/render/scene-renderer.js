@@ -1,3 +1,17 @@
+import { GAME_TITLE } from '../runtime/constants';
+
+const ENEMY_COLORS = {
+  grunt: '#f97316',
+  runner: '#60a5fa',
+  tank: '#ef4444'
+};
+
+const TOWER_COLORS = {
+  arrow: '#a3e635',
+  cannon: '#f59e0b',
+  ice: '#67e8f9'
+};
+
 export default class SceneRenderer {
   constructor({ width, height }) {
     this.width = width;
@@ -8,44 +22,142 @@ export default class SceneRenderer {
     ctx.clearRect(0, 0, this.width, this.height);
 
     this.drawBackground(ctx);
-    this.drawGrid(ctx);
+    this.drawGrid(ctx, snapshot.path);
+    this.drawPath(ctx, snapshot.path);
+    this.drawTowerSlots(ctx, snapshot.towerSlots);
+    this.drawTowers(ctx, snapshot.towers);
+    this.drawBullets(ctx, snapshot.bullets);
+    this.drawEnemies(ctx, snapshot.enemies);
     this.drawHud(ctx, snapshot);
   }
 
   drawBackground(ctx) {
-    ctx.fillStyle = '#102a43';
+    ctx.fillStyle = '#0b1f34';
     ctx.fillRect(0, 0, this.width, this.height);
   }
 
-  drawGrid(ctx) {
-    const cell = 48;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  drawGrid(ctx, path) {
+    const cell = path.gridSize;
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
     ctx.lineWidth = 1;
 
-    for (let x = 0; x <= this.width; x += cell) {
+    for (let x = path.offsetX; x <= path.offsetX + path.mapWidth; x += cell) {
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, this.height);
+      ctx.moveTo(x, path.offsetY);
+      ctx.lineTo(x, path.offsetY + path.mapHeight);
       ctx.stroke();
     }
 
-    for (let y = 0; y <= this.height; y += cell) {
+    for (let y = path.offsetY; y <= path.offsetY + path.mapHeight; y += cell) {
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(this.width, y);
+      ctx.moveTo(path.offsetX, y);
+      ctx.lineTo(path.offsetX + path.mapWidth, y);
       ctx.stroke();
+    }
+  }
+
+  drawPath(ctx, path) {
+    if (!path.points || path.points.length === 0) {
+      return;
+    }
+
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 18;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(path.points[0].x, path.points[0].y);
+
+    for (let i = 1; i < path.points.length; i += 1) {
+      ctx.lineTo(path.points[i].x, path.points[i].y);
+    }
+
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(8, 47, 73, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  drawTowerSlots(ctx, slots) {
+    for (const slot of slots) {
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(slot.x, slot.y, 16, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  drawTowers(ctx, towers) {
+    for (const tower of towers) {
+      const color = TOWER_COLORS[tower.type] || '#e2e8f0';
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(tower.x, tower.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(tower.x, tower.y, tower.range, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  drawBullets(ctx, bullets) {
+    for (const bullet of bullets) {
+      ctx.fillStyle = bullet.color;
+      ctx.beginPath();
+      ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  drawEnemies(ctx, enemies) {
+    for (const enemy of enemies) {
+      const color = ENEMY_COLORS[enemy.type] || '#f8fafc';
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      const barWidth = enemy.radius * 2;
+      const hpRatio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 0;
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+      ctx.fillRect(enemy.x - enemy.radius, enemy.y - enemy.radius - 8, barWidth, 4);
+
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(
+        enemy.x - enemy.radius,
+        enemy.y - enemy.radius - 8,
+        barWidth * hpRatio,
+        4
+      );
     }
   }
 
   drawHud(ctx, snapshot) {
-    const stateText = snapshot.state === 'running' ? '进行中' : '待开始';
+    const stateMap = {
+      running: '进行中',
+      win: '胜利',
+      lose: '失败',
+      idle: '待开始'
+    };
 
-    ctx.fillStyle = '#f0f4f8';
+    ctx.fillStyle = '#f8fafc';
     ctx.font = '20px Arial';
-    ctx.fillText(`迷你塔防原型`, 16, 30);
-    ctx.fillText(`状态：${stateText}`, 16, 56);
-    ctx.fillText(`波次：${snapshot.wave}`, 16, 82);
-    ctx.fillText(`生命：${snapshot.life}`, 16, 108);
-    ctx.fillText(`金币：${snapshot.gold}`, 16, 134);
+    ctx.fillText(`${GAME_TITLE} 原型`, 16, 30);
+    ctx.font = '18px Arial';
+    ctx.fillText(`状态：${stateMap[snapshot.state] || snapshot.state}`, 16, 56);
+    ctx.fillText(`波次：${snapshot.wave}/${snapshot.waveTotal}`, 16, 82);
+    ctx.fillText(`刷怪：${snapshot.waveSpawned}/${snapshot.waveTarget}`, 16, 108);
+    ctx.fillText(`生命：${snapshot.life}`, 16, 134);
+    ctx.fillText(`金币：${snapshot.gold}`, 16, 160);
+    ctx.fillText(`塔数：${snapshot.towers.length}  敌人：${snapshot.enemyCount}`, 16, 186);
   }
 }
