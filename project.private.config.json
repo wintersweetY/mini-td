@@ -1,5 +1,5 @@
 {
-  "libVersion": "latest",
+  "libVersion": "3.15.1",
   "projectname": "mini-td",
   "setting": {
     "urlCheck": false,
@@ -17,5 +17,6 @@
     "bigPackageSizeSupport": false,
     "checkInvalidKey": true,
     "ignoreDevUnusedFiles": true
-  }
+  },
+  "condition": {}
 }
