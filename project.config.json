@@ -25,7 +25,7 @@
   },
   "compileType": "game",
   "libVersion": "latest",
-  "appid": "touristappid",
+  "appid": "wxf4b83a2ccec29133",
   "projectname": "mini-td",
   "condition": {
     "search": {
@@ -50,6 +50,6 @@
     "ignore": [],
     "include": []
   },
-  "isGameTourist": true,
+  "isGameTourist": false,
   "editorSetting": {}
 }
