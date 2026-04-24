@@ -12,6 +12,10 @@ const TOWER_COLORS = {
   ice: '#67e8f9'
 };
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
 /**
  * 场景渲染器：负责把快照状态绘制到 Canvas。
  * 说明：
@@ -30,6 +34,7 @@ export default class SceneRenderer {
     this.drawBackground(ctx);
     this.drawGrid(ctx, snapshot.path);
     this.drawPath(ctx, snapshot.path);
+    this.drawFortress(ctx, snapshot.fortress, snapshot.life, snapshot.lifeMax);
     this.drawTowerSlots(ctx, snapshot.towerSlots);
     this.drawTowers(ctx, snapshot.towers);
     this.drawBullets(ctx, snapshot.bullets);
@@ -85,6 +90,47 @@ export default class SceneRenderer {
     ctx.strokeStyle = 'rgba(8, 47, 73, 0.55)';
     ctx.lineWidth = 2;
     ctx.stroke();
+  }
+
+  /**
+   * 绘制顶部堡垒与血条。
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {{x:number,y:number}} fortress
+   * @param {number} life
+   * @param {number} lifeMax
+   */
+  drawFortress(ctx, fortress, life, lifeMax) {
+    if (!fortress) {
+      return;
+    }
+
+    const hpRatio = lifeMax > 0 ? Math.max(0, life / lifeMax) : 0;
+    const fortressWidth = 140;
+    const fortressHeight = 34;
+    const fortressLeft = clamp(fortress.x - fortressWidth / 2, 6, this.width - fortressWidth - 6);
+    const fortressTop = clamp(fortress.y - fortressHeight / 2, 6, this.height - fortressHeight - 20);
+    const barWidth = fortressWidth;
+    const barHeight = 10;
+
+    // 顶部堡垒占位：后续可替换为你的正式美术资源。
+    ctx.fillStyle = '#7c3aed';
+    ctx.fillRect(fortressLeft, fortressTop, fortressWidth, fortressHeight);
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    ctx.fillRect(fortressLeft, fortressTop + fortressHeight + 8, barWidth, barHeight);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(
+      fortressLeft,
+      fortressTop + fortressHeight + 8,
+      barWidth * hpRatio,
+      barHeight
+    );
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('堡垒', fortress.x, fortress.y + 6);
+    ctx.textAlign = 'left';
   }
 
   /**
@@ -171,17 +217,22 @@ export default class SceneRenderer {
       idle: '待开始'
     };
 
+    // 底部紧凑信息面板，避免遮挡顶部战斗区域和堡垒。
+    const panelX = 12;
+    const panelY = this.height - 130;
+    const panelWidth = 250;
+    const panelHeight = 118;
+
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.6)';
+    ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+
     ctx.fillStyle = '#f8fafc';
-    ctx.font = '20px Arial';
-    ctx.fillText(`${GAME_TITLE} 原型`, 16, 30);
-    ctx.font = '18px Arial';
-    ctx.fillText(`状态：${stateMap[snapshot.state] || snapshot.state}`, 16, 56);
-    ctx.fillText(`波次：${snapshot.wave}/${snapshot.waveTotal}`, 16, 82);
-    ctx.fillText(`刷怪：${snapshot.waveSpawned}/${snapshot.waveTarget}`, 16, 108);
-    ctx.fillText(`生命：${snapshot.life}`, 16, 134);
-    ctx.fillText(`金币：${snapshot.gold}`, 16, 160);
-    ctx.fillText(`塔数：${snapshot.towers.length}  敌人：${snapshot.enemyCount}`, 16, 186);
-    ctx.fillText(`提示：${snapshot.hintText}`, 16, 212);
+    ctx.font = '14px Arial';
+    ctx.fillText(`${GAME_TITLE} | ${stateMap[snapshot.state] || snapshot.state}`, panelX + 10, panelY + 22);
+    ctx.fillText(`波次：${snapshot.wave}/${snapshot.waveTotal}  刷怪：${snapshot.waveSpawned}/${snapshot.waveTarget}`, panelX + 10, panelY + 44);
+    ctx.fillText(`堡垒：${snapshot.life}/${snapshot.lifeMax}  金币：${snapshot.gold}`, panelX + 10, panelY + 66);
+    ctx.fillText(`塔数：${snapshot.towers.length}  敌人：${snapshot.enemyCount}`, panelX + 10, panelY + 88);
+    ctx.fillText(`提示：${snapshot.hintText}`, panelX + 10, panelY + 110);
   }
 
   /**

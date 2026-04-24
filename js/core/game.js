@@ -1,4 +1,4 @@
-import { LEVEL_1 } from '../data/levels/level-1';
+import { DEFAULT_LEVEL_ID, getLevelById } from '../data/levels/index';
 import { TOWER_CONFIG } from '../config/towers';
 import WaveSystem from './systems/wave-system';
 import EconomySystem from './systems/economy-system';
@@ -9,6 +9,7 @@ import TowerSystem from './systems/tower-system';
 import BulletSystem from './systems/bullet-system';
 
 const INITIAL_GOLD = 420;
+const INITIAL_LIFE = 20;
 const BUILD_TYPE_ROTATION = ['arrow', 'ice', 'cannon'];
 const TAP_SLOT_RADIUS = 24;
 
@@ -33,9 +34,10 @@ export default class Game {
 
     this.frame = 0;
     this.state = 'idle';
-    this.life = 20;
+    this.lifeMax = INITIAL_LIFE;
+    this.life = INITIAL_LIFE;
 
-    this.level = LEVEL_1;
+    this.level = getLevelById(DEFAULT_LEVEL_ID);
     this.pathSystem = new PathSystem({ width, height, level: this.level });
 
     this.economy = new EconomySystem({ initialGold: INITIAL_GOLD });
@@ -51,13 +53,13 @@ export default class Game {
     this.enemySerial = 0;
     this.bulletSerial = 0;
     this.buildCursor = 0;
-    this.hintText = '点击塔位建造炮塔';
+    this.hintText = '敌人自底部来袭，守住顶部堡垒';
   }
 
   start() {
     this.frame = 0;
     this.state = 'running';
-    this.life = 20;
+    this.life = this.lifeMax;
     this.enemies = [];
     this.bullets = [];
     this.towers = [];
@@ -66,7 +68,7 @@ export default class Game {
     this.buildCursor = 0;
     this.economy = new EconomySystem({ initialGold: INITIAL_GOLD });
     this.waveSystem.start();
-    this.hintText = '点击塔位建造炮塔';
+    this.hintText = '敌人自底部来袭，守住顶部堡垒';
 
     this.bootstrapPresetTowers();
   }
@@ -264,7 +266,7 @@ export default class Game {
     if (this.life <= 0) {
       this.life = 0;
       this.state = 'lose';
-      this.hintText = '防线失守，点击任意位置重开';
+      this.hintText = '堡垒被攻破，点击任意位置重开';
       return;
     }
 
@@ -289,10 +291,12 @@ export default class Game {
       waveSpawned: this.waveSystem.spawnedInWave,
       waveTarget,
       life: this.life,
+      lifeMax: this.lifeMax,
       gold: this.economy.gold,
       hintText: this.hintText,
       enemyCount: this.enemies.length,
       path: this.pathSystem.path,
+      fortress: this.pathSystem.fortress,
       towerSlots: this.pathSystem.towerSlots,
       towers: this.towers.map((tower) => ({
         x: tower.x,
