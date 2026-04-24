@@ -42,4 +42,30 @@ export default class FallbackAdapter {
   }
 
   vibrateShort() {}
+
+  /**
+   * 绑定点击事件（浏览器回退环境）。
+   * @param {HTMLCanvasElement} canvas
+   * @param {(point:{x:number,y:number})=>void} handler
+   * @returns {() => void}
+   */
+  bindTap(canvas, handler) {
+    if (typeof window === 'undefined' || !canvas || !canvas.addEventListener) {
+      return () => {};
+    }
+
+    const listener = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      handler({
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      });
+    };
+
+    canvas.addEventListener('click', listener);
+
+    return () => {
+      canvas.removeEventListener('click', listener);
+    };
+  }
 }

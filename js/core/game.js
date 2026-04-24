@@ -9,6 +9,8 @@ import TowerSystem from './systems/tower-system';
 import BulletSystem from './systems/bullet-system';
 
 const INITIAL_GOLD = 420;
+const BUILD_TYPE_ROTATION = ['arrow', 'ice', 'cannon'];
+const TAP_SLOT_RADIUS = 24;
 
 /**
  * 游戏聚合根（核心主循环协调器）。
@@ -48,6 +50,8 @@ export default class Game {
     this.towers = [];
     this.enemySerial = 0;
     this.bulletSerial = 0;
+    this.buildCursor = 0;
+    this.hintText = '点击塔位建造炮塔';
   }
 
   start() {
@@ -59,8 +63,10 @@ export default class Game {
     this.towers = [];
     this.enemySerial = 0;
     this.bulletSerial = 0;
+    this.buildCursor = 0;
     this.economy = new EconomySystem({ initialGold: INITIAL_GOLD });
     this.waveSystem.start();
+    this.hintText = '点击塔位建造炮塔';
 
     this.bootstrapPresetTowers();
   }
@@ -113,6 +119,80 @@ export default class Game {
     });
 
     return true;
+  }
+
+  /**
+   * 输入事件入口。
+   * 约定：
+   * - 进行中：尝试在最近空塔位建造一座塔。
+   * - 胜利/失败：点击任意位置重新开始。
+   * @param {{x:number, y:number}} point
+   */
+  handleTap(point) {
+    if (this.state === 'win' || this.state === 'lose') {
+      this.start();
+      return;
+    }
+
+    if (this.state !== 'running') {
+      return;
+    }
+
+    const built = this.tryBuildTowerByTap(point);
+    if (built) {
+      this.hintText = '建造成功';
+    }
+  }
+
+  /**
+   * 根据点击位置尝试建塔。
+   * @param {{x:number, y:number}} point
+   * @returns {boolean}
+   */
+  tryBuildTowerByTap(point) {
+    const slot = this.findBuildSlotByTap(point);
+    if (!slot) {
+      this.hintText = '请选择空塔位';
+      return false;
+    }
+
+    const towerType = BUILD_TYPE_ROTATION[this.buildCursor % BUILD_TYPE_ROTATION.length];
+    const success = this.placeTower(slot.id, towerType);
+
+    if (!success) {
+      this.hintText = '金币不足或塔位不可用';
+      return false;
+    }
+
+    this.buildCursor += 1;
+    return true;
+  }
+
+  /**
+   * 从点击位置选择最近可建造塔位。
+   * @param {{x:number, y:number}} point
+   * @returns {{id:string,x:number,y:number} | null}
+   */
+  findBuildSlotByTap(point) {
+    let selected = null;
+
+    for (const slot of this.pathSystem.towerSlots) {
+      const occupied = this.towers.some((tower) => tower.slotId === slot.id);
+      if (occupied) {
+        continue;
+      }
+
+      const distance = Math.hypot(slot.x - point.x, slot.y - point.y);
+      if (distance > TAP_SLOT_RADIUS) {
+        continue;
+      }
+
+      if (!selected || distance < selected.distance) {
+        selected = { ...slot, distance };
+      }
+    }
+
+    return selected;
   }
 
   /**
@@ -184,11 +264,13 @@ export default class Game {
     if (this.life <= 0) {
       this.life = 0;
       this.state = 'lose';
+      this.hintText = '防线失守，点击任意位置重开';
       return;
     }
 
     if (this.waveSystem.finished && this.enemies.length === 0) {
       this.state = 'win';
+      this.hintText = '胜利！点击任意位置重开';
     }
   }
 
@@ -208,6 +290,7 @@ export default class Game {
       waveTarget,
       life: this.life,
       gold: this.economy.gold,
+      hintText: this.hintText,
       enemyCount: this.enemies.length,
       path: this.pathSystem.path,
       towerSlots: this.pathSystem.towerSlots,

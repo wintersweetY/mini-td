@@ -58,4 +58,39 @@ export default class WechatAdapter {
       this.wx.vibrateShort({ type });
     }
   }
+
+  /**
+   * 绑定点击/触摸事件（微信小游戏环境）。
+   * @param {HTMLCanvasElement} _canvas
+   * @param {(point:{x:number,y:number})=>void} handler
+   * @returns {() => void} 解除绑定函数
+   */
+  bindTap(_canvas, handler) {
+    if (!this.wx.onTouchStart) {
+      return () => {};
+    }
+
+    const listener = (event) => {
+      const touch =
+        (event.touches && event.touches[0]) ||
+        (event.changedTouches && event.changedTouches[0]);
+
+      if (!touch) {
+        return;
+      }
+
+      handler({
+        x: touch.clientX ?? touch.pageX ?? 0,
+        y: touch.clientY ?? touch.pageY ?? 0
+      });
+    };
+
+    this.wx.onTouchStart(listener);
+
+    return () => {
+      if (this.wx.offTouchStart) {
+        this.wx.offTouchStart(listener);
+      }
+    };
+  }
 }

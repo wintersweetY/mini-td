@@ -26,6 +26,8 @@ export default class Main {
     this.lastTime = 0;
     this.accumulator = 0;
     this.loop = this.loop.bind(this);
+    this.handleTap = this.handleTap.bind(this);
+    this.unbindTap = this.platform.bindTap(this.canvas, this.handleTap);
 
     this.start();
   }
@@ -61,5 +63,13 @@ export default class Main {
 
     this.renderer.render(this.ctx, this.game.getSnapshot());
     this.aniId = this.platform.requestAnimationFrame(this.loop);
+  }
+
+  /**
+   * 转发输入给核心逻辑层处理。
+   * @param {{x:number, y:number}} point
+   */
+  handleTap(point) {
+    this.game.handleTap(point);
   }
 }

@@ -35,6 +35,7 @@ export default class SceneRenderer {
     this.drawBullets(ctx, snapshot.bullets);
     this.drawEnemies(ctx, snapshot.enemies);
     this.drawHud(ctx, snapshot);
+    this.drawStateOverlay(ctx, snapshot);
   }
 
   drawBackground(ctx) {
@@ -180,5 +181,26 @@ export default class SceneRenderer {
     ctx.fillText(`生命：${snapshot.life}`, 16, 134);
     ctx.fillText(`金币：${snapshot.gold}`, 16, 160);
     ctx.fillText(`塔数：${snapshot.towers.length}  敌人：${snapshot.enemyCount}`, 16, 186);
+    ctx.fillText(`提示：${snapshot.hintText}`, 16, 212);
+  }
+
+  /**
+   * 胜负结算覆盖层。
+   */
+  drawStateOverlay(ctx, snapshot) {
+    if (snapshot.state !== 'win' && snapshot.state !== 'lose') {
+      return;
+    }
+
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.66)';
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '34px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(snapshot.state === 'win' ? '胜利' : '失败', this.width / 2, this.height / 2 - 12);
+    ctx.font = '20px Arial';
+    ctx.fillText('点击任意位置重新开始', this.width / 2, this.height / 2 + 24);
+    ctx.textAlign = 'left';
   }
 }
