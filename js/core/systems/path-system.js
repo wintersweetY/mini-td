@@ -1,4 +1,12 @@
+/**
+ * 路径系统：负责把关卡网格坐标转换为渲染/碰撞使用的像素坐标。
+ * 说明：
+ * - 地图会在屏幕中居中（保留最小边距），保证不同分辨率下可见。
+ */
 export default class PathSystem {
+  /**
+   * @param {{ width:number, height:number, level:{gridSize:number, pathCells:Array<{x:number,y:number}>, towerSlots?:Array<{id:string,x:number,y:number}>} }} params
+   */
   constructor({ width, height, level }) {
     this.width = width;
     this.height = height;
@@ -33,6 +41,11 @@ export default class PathSystem {
     };
   }
 
+  /**
+   * 将塔位网格坐标转换为像素坐标。
+   * @param {Array<{id:string,x:number,y:number}>} slots
+   * @returns {Array<{id:string,x:number,y:number}>}
+   */
   buildTowerSlots(slots) {
     return slots.map((slot) => ({
       id: slot.id,

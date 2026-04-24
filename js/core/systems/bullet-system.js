@@ -1,4 +1,10 @@
+/**
+ * 子弹系统：负责追踪目标、命中判定与伤害写入。
+ */
 export default class BulletSystem {
+  /**
+   * @param {{ bullets:Array<any>, enemies:Array<any>, deltaSeconds:number }} params
+   */
   updateBullets({ bullets, enemies, deltaSeconds }) {
     const enemyById = new Map(enemies.map((enemy) => [enemy.id, enemy]));
 

@@ -1,3 +1,13 @@
+/**
+ * 防御塔配置表。
+ * 说明：
+ * 1. 配置为“塔基础属性”，升级曲线将在后续阶段追加。
+ * 2. 数值单位：
+ *    - cost：建造消耗金币
+ *    - damage：单发伤害
+ *    - range：攻击范围（像素）
+ *    - attackInterval：攻击间隔（逻辑帧，60fps 下每帧约 16.67ms）
+ */
 export const TOWER_CONFIG = {
   arrow: {
     id: 'arrow',

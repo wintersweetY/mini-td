@@ -10,7 +10,21 @@ import BulletSystem from './systems/bullet-system';
 
 const INITIAL_GOLD = 420;
 
+/**
+ * 游戏聚合根（核心主循环协调器）。
+ * 职责：
+ * 1. 组织各系统更新顺序（刷怪 -> 塔开火 -> 子弹命中 -> 敌人结算 -> 胜负判定）。
+ * 2. 维护跨系统共享状态（life、wave、gold、实体容器）。
+ * 3. 对渲染层输出只读快照（snapshot）。
+ *
+ * 资源说明：
+ * - 当前版本仅提供逻辑与程序化占位渲染，不依赖图片/音频资源文件。
+ * - 后续接入你提供的美术和音频时，仅替换 render/platform 层，不改 core 规则。
+ */
 export default class Game {
+  /**
+   * @param {{ width:number, height:number }} params
+   */
   constructor({ width, height }) {
     this.width = width;
     this.height = height;
@@ -51,12 +65,21 @@ export default class Game {
     this.bootstrapPresetTowers();
   }
 
+  /**
+   * 根据关卡预设放置初始塔，用于快速形成可玩闭环。
+   */
   bootstrapPresetTowers() {
     for (const towerSpec of this.level.presetTowers || []) {
       this.placeTower(towerSpec.slotId, towerSpec.type);
     }
   }
 
+  /**
+   * 在指定塔位建造防御塔。
+   * @param {string} slotId
+   * @param {'arrow'|'cannon'|'ice'} type
+   * @returns {boolean} 是否放置成功（失败通常为塔位无效/已占用/金币不足）
+   */
   placeTower(slotId, type) {
     const slot = this.pathSystem.towerSlots.find((item) => item.id === slotId);
     const config = TOWER_CONFIG[type];
@@ -92,6 +115,10 @@ export default class Game {
     return true;
   }
 
+  /**
+   * 核心逻辑更新（固定时间步长驱动）。
+   * @param {number} deltaSeconds - 逻辑步长（秒）
+   */
   update(deltaSeconds) {
     if (this.state !== 'running') {
       return;
@@ -110,6 +137,7 @@ export default class Game {
       );
     });
 
+    // 顺序约束：塔先决定是否开火，再由子弹系统推进与命中。
     this.towerSystem.updateTowers({
       towers: this.towers,
       enemies: this.enemies,
@@ -135,6 +163,7 @@ export default class Game {
       deltaSeconds
     });
 
+    // 敌人系统负责移除“到点/死亡”的敌人，并返回结算结果。
     const { escapedCount, defeatedRewards } = this.enemySystem.updateEnemies(
       this.enemies,
       deltaSeconds
@@ -163,6 +192,9 @@ export default class Game {
     }
   }
 
+  /**
+   * 输出渲染快照，避免 render 层直接读写核心状态。
+   */
   getSnapshot() {
     const wave = this.waveSystem.currentWave;
     const waveTarget = this.waveSystem.getEnemyCountForWave(wave);

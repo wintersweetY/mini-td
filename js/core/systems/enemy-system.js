@@ -1,8 +1,20 @@
+/**
+ * 敌人系统：负责路径行进、到点逃脱判定、死亡回收与奖励统计。
+ */
 export default class EnemySystem {
+  /**
+   * @param {{ pathPoints:Array<{x:number,y:number}> }} params
+   */
   constructor({ pathPoints }) {
     this.pathPoints = pathPoints;
   }
 
+  /**
+   * 更新全部敌人。
+   * @param {Array<any>} enemies
+   * @param {number} deltaSeconds - 固定时间步长（秒）
+   * @returns {{ escapedCount:number, defeatedRewards:number[] }}
+   */
   updateEnemies(enemies, deltaSeconds) {
     let escapedCount = 0;
     const defeatedRewards = [];
@@ -33,6 +45,11 @@ export default class EnemySystem {
     };
   }
 
+  /**
+   * 按剩余路点推进单个敌人。
+   * @param {any} enemy
+   * @param {number} deltaSeconds
+   */
   moveEnemy(enemy, deltaSeconds) {
     if (enemy.hasReachedGoal || enemy.waypointIndex >= this.pathPoints.length) {
       enemy.hasReachedGoal = true;

@@ -4,6 +4,9 @@ import SceneRenderer from './render/scene-renderer';
 import Game from './core/game';
 import { FIXED_TIME_STEP_MS, MAX_FRAME_DELTA_MS } from './runtime/constants';
 
+/**
+ * 程序入口：负责拼装平台、核心逻辑与渲染，并驱动固定步长主循环。
+ */
 export default class Main {
   constructor() {
     this.platform = createPlatformBridge();
@@ -34,6 +37,12 @@ export default class Main {
     this.aniId = this.platform.requestAnimationFrame(this.loop);
   }
 
+  /**
+   * 渲染帧循环。
+   * 说明：
+   * - 使用 accumulator 模型将可变帧率转换为固定逻辑步长。
+   * - 单帧 delta 上限 MAX_FRAME_DELTA_MS 用于避免后台恢复时“补帧雪崩”。
+   */
   loop() {
     const now = this.platform.now();
 

@@ -12,6 +12,12 @@ const TOWER_COLORS = {
   ice: '#67e8f9'
 };
 
+/**
+ * 场景渲染器：负责把快照状态绘制到 Canvas。
+ * 说明：
+ * - 当前全部图形为程序化占位绘制（色块/圆形/线条）。
+ * - 待你后续提供图片资源后，可在本文件替换为贴图渲染，不影响 core 逻辑。
+ */
 export default class SceneRenderer {
   constructor({ width, height }) {
     this.width = width;
@@ -80,6 +86,9 @@ export default class SceneRenderer {
     ctx.stroke();
   }
 
+  /**
+   * 绘制可建造塔位占位圈。
+   */
   drawTowerSlots(ctx, slots) {
     for (const slot of slots) {
       ctx.strokeStyle = 'rgba(226, 232, 240, 0.5)';
@@ -90,6 +99,9 @@ export default class SceneRenderer {
     }
   }
 
+  /**
+   * 绘制已建造塔体与范围圈。
+   */
   drawTowers(ctx, towers) {
     for (const tower of towers) {
       const color = TOWER_COLORS[tower.type] || '#e2e8f0';
@@ -107,6 +119,9 @@ export default class SceneRenderer {
     }
   }
 
+  /**
+   * 绘制子弹占位表现。
+   */
   drawBullets(ctx, bullets) {
     for (const bullet of bullets) {
       ctx.fillStyle = bullet.color;
@@ -116,6 +131,9 @@ export default class SceneRenderer {
     }
   }
 
+  /**
+   * 绘制敌人与血条。
+   */
   drawEnemies(ctx, enemies) {
     for (const enemy of enemies) {
       const color = ENEMY_COLORS[enemy.type] || '#f8fafc';
@@ -141,6 +159,9 @@ export default class SceneRenderer {
     }
   }
 
+  /**
+   * 绘制 HUD 信息。
+   */
   drawHud(ctx, snapshot) {
     const stateMap = {
       running: '进行中',

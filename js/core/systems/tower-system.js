@@ -1,4 +1,15 @@
+/**
+ * 防御塔系统：负责索敌与触发开火，不处理子弹飞行与命中。
+ */
 export default class TowerSystem {
+  /**
+   * @param {{
+   *   towers:Array<any>,
+   *   enemies:Array<any>,
+   *   frame:number,
+   *   spawnBullet:(bullet:{x:number,y:number,targetId:string,damage:number,speed:number,color:string,radius:number})=>void
+   * }} params
+   */
   updateTowers({ towers, enemies, frame, spawnBullet }) {
     for (const tower of towers) {
       if (frame - tower.lastAttackFrame < tower.attackInterval) {
@@ -23,6 +34,12 @@ export default class TowerSystem {
     }
   }
 
+  /**
+   * 选取目标：优先路径进度更靠后的敌人；同进度取更近者。
+   * @param {any} tower
+   * @param {Array<any>} enemies
+   * @returns {any | null}
+   */
   selectTarget(tower, enemies) {
     let chosen = null;
 
